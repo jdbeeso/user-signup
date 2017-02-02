@@ -20,6 +20,16 @@ class MainHandler(webapp2.RequestHandler):
     def get(self):
         self.response.write('Hello world!')
 
+class Welcome(BaseHandler):
+    def get(self):
+        username = self.request.get('username')
+        if valid_username(username):
+            self.render('welcome.html', username = username)
+        else:
+            self.redirect('/signup')
+
 app = webapp2.WSGIApplication([
     ('/', MainHandler)
+    ('/signup', Signup)
+    ('/welcome', Welcome)
 ], debug=True)
