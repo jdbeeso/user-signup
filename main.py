@@ -17,28 +17,9 @@
 import webapp2
 import re
 
-def valid_login(username, passcode, verify):
-        valid = False
-        if valid_username(username):
-                if valid_passcode(passcode, verify):
-                        valid = True
-        return valid
-
-USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
-def valid_username(username):
-    return username and USER_RE.match(username)
-
-PASS_RE = re.compile(r"^.{3,20}$")
-def valid_passcode(passcode):
-    return password and PASS_RE.match(password)
-
-EMAIL_RE  = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
-def valid_email(email):
-    return not email or EMAIL_RE.match(email)
-
 header = "<h1>User Signup</h1>"
 form = """
-         <form action='/welcome'>
+         <form method='post'>
                <label>Username:
                <input type='text' name='username'>
                </label>
@@ -63,12 +44,46 @@ class MainHandler(webapp2.RequestHandler):
         self.response.write(content)
 
     def post(self):
-        if not valid_login(self.request.get('username'), self.request.get('passcode'), self.request.get('verify')):
-                if valid_username(self.request.get('username'):
+        def valid_login(username, passcode, verify, email):
+                if valid_username(username):
+                        valid = True
+                else:
+                        self.redirect('/signup')
+                if valid_passcode(passcode):
+                        valid = True
+                else:
+                        self.redirect('/signup')
+                if passwords_match(passcode, verify):
+                        valid = True
+                else:
+                        self.redirect('/signup')
+                                        
+                return valid
+
+        def passwords_match(passcode, verify):
+                if passcode == verify:
+                        return True
+        
+        USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
+        def valid_username(username):
+            return username and USER_RE.match(username)
+
+        PASS_RE = re.compile(r"^.{3,20}$")
+        def valid_passcode(passcode):
+            return password and PASS_RE.match(password)
+
+        EMAIL_RE  = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
+        def valid_email(email):
+            return not email or EMAIL_RE.match(email)
+        username = self.request.get('username')
+        passcode = self.request.get('passcode')
+        verify   = self.request.get('verify')
+        email    = self.request.get('email')
+        valid_login(username, passcode, verify, email)
+        
                                   
 class signup(webapp2.RequestHandler):
     def get(self):
-        form 
         self.response.out.write("<h1>User Signup</h1>" + "<h2>Please Signup</h2>" + form)
 
 class Welcome(webapp2.RequestHandler):      
