@@ -22,18 +22,22 @@ form = """
          <form method='post'>
                <label>Username:
                <input type='text' name='username'>
+               <div>%(error)s</div>
                </label>
 <br></br>
                <label>Passcode:
                <input type='text' name='passcode'>
+               <div>%(passcode_error)s</div>
                </label>
 <br></br>
                <label>Verify:
                <input type='text' name='verify'>
+               <div style="color: red">%(verify_error)s</div>
                </label>
 <br></br>
                <label>Email(optional):
                <input type='text' name='email'>
+               <div style>%(email_error)s</div>
                </label>
 <br></br>
                <input type='submit'>
@@ -48,6 +52,8 @@ class MainHandler(webapp2.RequestHandler):
                 if valid_username(username):
                         valid = True
                 else:
+                        error = "That username is not valid"
+                        write_form(error)
                         self.redirect('/signup')
                 if valid_passcode(passcode):
                         valid = True
@@ -70,7 +76,7 @@ class MainHandler(webapp2.RequestHandler):
 
         PASS_RE = re.compile(r"^.{3,20}$")
         def valid_passcode(passcode):
-            return password and PASS_RE.match(password)
+            return passcode and PASS_RE.match(passcode)
 
         EMAIL_RE  = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
         def valid_email(email):
@@ -79,18 +85,21 @@ class MainHandler(webapp2.RequestHandler):
         passcode = self.request.get('passcode')
         verify   = self.request.get('verify')
         email    = self.request.get('email')
-        valid_login(username, passcode, verify, email)
-        
+        if valid_login(username, passcode, verify, email):
+                self.response.out.write("<h1>Welcome, " + username + "</h1>")
+
+        def write_form(username='', passcode='', verify='', email='', username_error='', passcode_error='', v_passcode='', email_error=''):
+                parameters = "username = 
+                self.response.out.write(form % parameters)
                                   
 class signup(webapp2.RequestHandler):
     def get(self):
-        self.response.out.write("<h1>User Signup</h1>" + "<h2>Please Signup</h2>" + form)
+        self.response.out.write("<h1>User Signup</h1>" + "<h2>Please Signup</h2>" + (form % parameters))
 
 class Welcome(webapp2.RequestHandler):      
     def get(self):   
-            self.response.out.write("<h1>Welcome, " + username + "</h1>")
-        else:
-            self.redirect('/signup')
+            self.response.out.write("<h1>Welcome,&nbsp" + username + "</h1>")
+
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),('/signup', signup),('/welcome', Welcome)
